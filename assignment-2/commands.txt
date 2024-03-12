@@ -1,0 +1,20 @@
+/*************** Do everything using CLI commands then store in /CLI_test ***************/
+
+// generate A's secret and public keys
+cargo run keygen CLI_test/a_sk.txt CLI_test/a_pk.txt
+
+// generate B's secret and public keys
+cargo run keygen CLI_test/b_sk.txt CLI_test/b_pk.txt
+
+// Assume A is sender, B is receiver. B sends outs their public key to A. A has their own secret key.
+cargo run encrypt examples/example1.jpg CLI_test/example1_enc_test.txt CLI_test/a_sk.txt CLI_test/b_pk.txt
+cargo run decrypt CLI_test/example1_enc_test.txt CLI_test/example1_out_test.jpg CLI_test/b_sk.txt CLI_test/a_pk.txt
+
+// Assume B is sender, A is receiver. A sends outs their public key to B. B has their own secret key.
+cargo run encrypt examples/example2.jpg CLI_test/example2_enc_test.txt CLI_test/b_sk.txt CLI_test/a_pk.txt
+cargo run decrypt CLI_test/example2_enc_test.txt CLI_test/example2_out_test.jpg CLI_test/a_sk.txt CLI_test/b_pk.txt
+
+
+
+// to gzip the directory
+tar -czvf assignment-2.tar.gz assignment-2
