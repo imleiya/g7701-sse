@@ -5,7 +5,7 @@
 use csv;
 use argon2::{
     password_hash::{
-        PasswordHash, PasswordVerifier,
+        PasswordHash, PasswordVerifier
     },
     Argon2
 };
@@ -27,11 +27,19 @@ fn get_user_input(prompt: &str) -> String{
     io::stdin().read_line(&mut input)
         .expect("Failed to read your input.");
 
-    input.trim().to_string()
+    // Exit program if input is empty
+    let input = input.trim().to_string();
+    if input.is_empty(){
+        println!("Invalid input!");
+        process::exit(0);
+    } else {
+        input
+    }
+}
 
-    /*
-    How to handle empty entries: print warning then loop until user actually puts something 
-     */
+fn get_pwd_from_db(record: &csv::StringRecord) -> String{
+    return record.get(1).map(|stored_pwd| stored_pwd.to_string())
+        .expect("Error! Access denied! --> Cannot get password matching username.");
 }
 
 
@@ -45,12 +53,10 @@ fn lookup_in_db(input: &str, file_name: &str) -> String {
     for record in rdr.records(){         // iterate through rows in the CSV file
         let record = record 
                 .expect("Error! Access denied! --> Cannot read record in password database."); 
-        if let Some(username) = record.get(0){                  // get row's first column entry; should be the username
-            if username.trim() == input{                              // if the entry matches the user input
-                if let Some(stored_pwd) = record.get(1){         // get row's second column entry; should be the hashed password
-                    return stored_pwd.to_string();           // return the hashed password as string
+        if let Some(username) = record.get(0){
+                if username.trim() == input{
+                    return get_pwd_from_db(&record);
                 }
-            } 
         }
     }
     println!("Error! Access denied! --> No username match!");
@@ -92,3 +98,11 @@ fn main(){
     // 6. Verify the password has from the CSV file with the password that was input
     let _ = verify_password(&stored_pwd, &password);
 }
+
+// #cfg[(test)]
+// mod tests{
+//     #[test]
+//     fn can_lookup_in_db{
+//         password = lookup_in_db
+//     }
+// }
